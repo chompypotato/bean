@@ -12,6 +12,13 @@ const PLAYER_SPEED = 5;
 const JUMP_FORCE = -10;
 const BULLET_SPEED = 5;
 
+// Platforms
+const platforms = [
+    { x: 100, y: canvas.height - 150, width: 200, height: 20 },
+    { x: 400, y: canvas.height - 250, width: 200, height: 20 },
+    { x: 700, y: canvas.height - 350, width: 200, height: 20 }
+];
+
 let keys = {};
 let player = {
     x: canvas.width / 2,
@@ -59,8 +66,22 @@ function update() {
     // Apply gravity
     player.dy += GRAVITY;
 
-    // Check for floor collision
-    if (player.y > canvas.height - PLAYER_HEIGHT) {
+    // Check for platform collision
+    let onGround = false;
+    platforms.forEach(platform => {
+        if (player.x < platform.x + platform.width &&
+            player.x + player.width > platform.x &&
+            player.y + player.height > platform.y &&
+            player.y < platform.y + platform.height) {
+                
+            player.y = platform.y - player.height;
+            player.dy = 0;
+            player.jumping = false;
+            onGround = true;
+        }
+    });
+
+    if (!onGround && player.y > canvas.height - PLAYER_HEIGHT) {
         player.y = canvas.height - PLAYER_HEIGHT;
         player.dy = 0;
         player.jumping = false;
@@ -83,6 +104,12 @@ function update() {
 // Draw function
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw platforms
+    ctx.fillStyle = 'gray';
+    platforms.forEach(platform => {
+        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+    });
 
     // Draw player
     ctx.fillStyle = 'red';
