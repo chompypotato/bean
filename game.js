@@ -1,106 +1,109 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Set canvas size
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const player = {
+const GRAVITY = 0.5;
+const PLAYER_WIDTH = 50;
+const PLAYER_HEIGHT = 50;
+const PLAYER_SPEED = 5;
+const JUMP_FORCE = -10;
+const BULLET_SPEED = 5;
+
+let keys = {};
+let player = {
     x: canvas.width / 2,
-    y: canvas.height / 2,
-    size: 30,
-    speed: 5
+    y: canvas.height - PLAYER_HEIGHT,
+    width: PLAYER_WIDTH,
+    height: PLAYER_HEIGHT,
+    dx: 0,
+    dy: 0,
+    jumping: false
 };
 
-const bullets = [];
-const bulletSpeed = 10;
-const bulletSize = 5;
+let bullets = [];
 
-const keys = {};
-let maxBullets = 10;
-let currentBullets = maxBullets;
-
-document.addEventListener('keydown', (e) => {
+// Event listeners
+window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
 });
-document.addEventListener('keyup', (e) => {
+
+window.addEventListener('keyup', (e) => {
     keys[e.key] = false;
 });
-document.addEventListener('click', shoot);
 
-function shoot() {
-    if (currentBullets > 0) {
-        const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
-        bullets.push({
-            x: player.x,
-            y: player.y,
-            vx: Math.cos(angle) * bulletSpeed,
-            vy: Math.sin(angle) * bulletSpeed
-        });
-        currentBullets--;
-        updateBulletCountDisplay();
+// Game loop
+function update() {
+    // Player movement
+    if (keys['ArrowLeft']) {
+        player.dx = -PLAYER_SPEED;
+    } else if (keys['ArrowRight']) {
+        player.dx = PLAYER_SPEED;
+    } else {
+        player.dx = 0;
     }
-}
-
-let mouseX = 0;
-let mouseY = 0;
-document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-});
-
-function updatePlayer() {
-    if (keys['ArrowUp'] || keys['w']) player.y -= player.speed;
-    if (keys['ArrowDown'] || keys['s']) player.y += player.speed;
-    if (keys['ArrowLeft'] || keys['a']) player.x -= player.speed;
-    if (keys['ArrowRight'] || keys['d']) player.x += player.speed;
     
-    player.x = Math.max(player.size / 2, Math.min(canvas.width - player.size / 2, player.x));
-    player.y = Math.max(player.size / 2, Math.min(canvas.height - player.size / 2, player.y));
-}
-
-function updateBullets() {
-    for (let i = bullets.length - 1; i >= 0; i--) {
-        const bullet = bullets[i];
-        bullet.x += bullet.vx;
-        bullet.y += bullet.vy;
-        
-        if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
-            bullets.splice(i, 1);
+    if (keys[' ']) {
+        if (!player.jumping) {
+            player.dy = JUMP_FORCE;
+            player.jumping = true;
         }
     }
-}
 
-function drawPlayer() {
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(player.x - player.size / 2, player.y - player.size / 2, player.size, player.size);
-}
+    // Update player position
+    player.x += player.dx;
+    player.y += player.dy;
+    
+    // Apply gravity
+    player.dy += GRAVITY;
 
-function drawBullets() {
-    ctx.fillStyle = 'red';
-    for (const bullet of bullets) {
-        ctx.beginPath();
-        ctx.arc(bullet.x, bullet.y, bulletSize, 0, Math.PI * 2);
-        ctx.fill();
+    // Check for floor collision
+    if (player.y > canvas.height - PLAYER_HEIGHT) {
+        player.y = canvas.height - PLAYER_HEIGHT;
+        player.dy = 0;
+        player.jumping = false;
     }
+
+    // Bullet movement
+    bullets.forEach((bullet, index) => {
+        bullet.x += bullet.dx;
+        if (bullet.x > canvas.width || bullet.x < 0) {
+            bullets.splice(index, 1);
+        }
+    });
+
+    // Draw everything
+    draw();
+    
+    requestAnimationFrame(update);
 }
 
+// Draw function
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw the player and bullets
-    drawPlayer();
-    drawBullets();
+
+    // Draw player
+    ctx.fillStyle = 'red';
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    // Draw bullets
+    ctx.fillStyle = 'black';
+    bullets.forEach(bullet => {
+        ctx.fillRect(bullet.x, bullet.y, 10, 5);
+    });
 }
 
-function updateBulletCountDisplay() {
-    document.getElementById('bulletCount').textContent = `Bullets: ${currentBullets}`;
-}
+// Shooting bullets
+window.addEventListener('mousedown', () => {
+    let bullet = {
+        x: player.x + PLAYER_WIDTH / 2,
+        y: player.y + PLAYER_HEIGHT / 2,
+        dx: BULLET_SPEED
+    };
+    bullets.push(bullet);
+});
 
-function gameLoop() {
-    updatePlayer();
-    updateBullets();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-gameLoop();
+// Start the game
+update();
