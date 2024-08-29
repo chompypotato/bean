@@ -10,22 +10,32 @@ document.body.appendChild(renderer.domElement);
 // Set the background color of the scene to light grey
 renderer.setClearColor(0xd3d3d3);  // Light grey color
 
+// Add ambient light to the scene
+const ambientLight = new THREE.AmbientLight(0xffffff); // White light
+scene.add(ambientLight);
+
+// Add a directional light to the scene
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(1, 1, 1).normalize();
+scene.add(directionalLight);
+
 // Add a basic cube to the scene
 const playerGeometry = new THREE.BoxGeometry();
-const playerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
 const playerCube = new THREE.Mesh(playerGeometry, playerMaterial);
+playerCube.position.set(0, 0.5, 0); // Position the player cube slightly above the ground
 scene.add(playerCube);
 
 // Add an enemy to the scene
 const enemyGeometry = new THREE.BoxGeometry();
-const enemyMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const enemyMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
 const enemyCube = new THREE.Mesh(enemyGeometry, enemyMaterial);
-enemyCube.position.set(5, 0, 5);  // Position the enemy somewhere in the scene
+enemyCube.position.set(5, 0.5, 5);  // Position the enemy cube somewhere in the scene
 scene.add(enemyCube);
 
 // Set up the camera position
 camera.position.set(0, 1.6, 5);  // Position the camera slightly above the ground
-camera.rotation.set(0, Math.PI, 0); // Face the camera toward the player
+camera.lookAt(new THREE.Vector3(0, 0, 0)); // Make sure the camera looks at the origin
 
 // Set up the controls
 const controls = new THREE.PointerLockControls(camera, renderer.domElement);
