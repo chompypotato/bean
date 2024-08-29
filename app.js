@@ -7,6 +7,9 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Set the background color of the scene to light grey
+renderer.setClearColor(0xd3d3d3);  // Light grey color
+
 // Add a basic cube to the scene
 const playerGeometry = new THREE.BoxGeometry();
 const playerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -38,7 +41,7 @@ const direction = new THREE.Vector3();
 const clock = new THREE.Clock();
 let isMovingForward = false, isMovingBackward = false, isMovingLeft = false, isMovingRight = false;
 
-// Handle keydown and keyup events
+// Handle keydown and keyup events for player movement
 document.addEventListener('keydown', (event) => {
     switch(event.code) {
         case 'KeyW': isMovingForward = true; break;
@@ -74,7 +77,7 @@ function animate() {
     const delta = clock.getDelta(); // seconds.
     const moveSpeed = 10 * delta; // Speed of movement
 
-    // Update movement
+    // Update movement direction
     direction.z = Number(isMovingForward) - Number(isMovingBackward);
     direction.x = Number(isMovingRight) - Number(isMovingLeft);
     direction.normalize(); // Normalize the direction vector
