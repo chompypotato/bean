@@ -8,14 +8,21 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Add a basic cube to the scene
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+const playerGeometry = new THREE.BoxGeometry();
+const playerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const playerCube = new THREE.Mesh(playerGeometry, playerMaterial);
+scene.add(playerCube);
+
+// Add an enemy to the scene
+const enemyGeometry = new THREE.BoxGeometry();
+const enemyMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const enemyCube = new THREE.Mesh(enemyGeometry, enemyMaterial);
+enemyCube.position.set(5, 0, 5);  // Position the enemy somewhere in the scene
+scene.add(enemyCube);
 
 // Set up the camera position
 camera.position.set(0, 1.6, 5);  // Position the camera slightly above the ground
-camera.rotation.set(0, Math.PI, 0); // Face the camera toward the cube
+camera.rotation.set(0, Math.PI, 0); // Face the camera toward the player
 
 // Set up the controls
 const controls = new THREE.PointerLockControls(camera, renderer.domElement);
@@ -49,6 +56,17 @@ document.addEventListener('keyup', (event) => {
     }
 });
 
+// Enemy AI logic
+function updateEnemy() {
+    const distance = enemyCube.position.distanceTo(playerCube.position);
+    const moveSpeed = 2;
+
+    if (distance > 1) {
+        // Move the enemy towards the player
+        enemyCube.position.lerp(playerCube.position, 0.01); // Lerp for smooth movement
+    }
+}
+
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
@@ -70,6 +88,9 @@ function animate() {
 
     controls.moveRight(-velocity.x);
     controls.moveForward(-velocity.z);
+
+    // Update enemy
+    updateEnemy();
 
     renderer.render(scene, camera);
 }
