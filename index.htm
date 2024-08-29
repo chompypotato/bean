@@ -3,17 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple 2D Perspective Shooter</title>
+    <title>2D Run and Gun Platformer</title>
     <style>
-        body { margin: 0; }
-        canvas { display: block; }
-        #bulletCount { position: absolute; top: 10px; left: 10px; color: black; font-size: 20px; }
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background: #87CEEB;
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
-    <div id="bulletCount">Bullets: 10</div>
     <script src="game.js"></script>
 </body>
 </html>
+
 
