@@ -3,19 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local Chat App</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>WebRTC Chat</title>
+    <style>
+        #messages {
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        #message-input, #name-input {
+            width: 70%;
+            margin-right: 10px;
+        }
+        #send-button {
+            width: 20%;
+        }
+    </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-box" id="chatBox"></div>
-        <div id="nameSection">
-            <input type="text" id="nameInput" placeholder="Enter your name">
-            <button id="setNameButton">Set Name</button>
-        </div>
-        <textarea id="messageInput" placeholder="Type your message"></textarea>
-        <button id="sendButton">Send</button>
+    <h1>WebRTC Chat</h1>
+    <div>
+        <label for="name-input">Your Name:</label>
+        <input id="name-input" type="text" placeholder="Enter your name...">
     </div>
-    <script src="script.js"></script>
+    <div id="messages"></div>
+    <input id="message-input" type="text" placeholder="Type a message...">
+    <button id="send-button">Send</button>
+
+    <script src="chat.js"></script>
 </body>
 </html>
