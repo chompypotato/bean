@@ -17,48 +17,64 @@ function createConnection() {
     remoteConnection = new RTCPeerConnection(servers);
 
     localChannel = localConnection.createDataChannel('chat');
-    remoteChannel = remoteConnection.createDataChannel('chat');
+    console.log('Local channel created:', localChannel);
+
+    remoteConnection.ondatachannel = e => {
+        remoteChannel = e.channel;
+        console.log('Remote channel received:', remoteChannel);
+        remoteChannel.onmessage = e => {
+            console.log('Received data from remote channel:', e.data);
+            handleMessage(e.data);
+        };
+    };
+
+    localChannel.onmessage = e => {
+        console.log('Received data from local channel:', e.data);
+        handleMessage(e.data);
+    };
 
     localConnection.onicecandidate = e => {
         if (e.candidate) {
-            remoteConnection.addIceCandidate(e.candidate);
+            console.log('Sending ICE candidate:', e.candidate);
+            remoteConnection.addIceCandidate(e.candidate)
+                .catch(err => console.error('Error adding ICE candidate:', err));
         }
     };
 
     remoteConnection.onicecandidate = e => {
         if (e.candidate) {
-            localConnection.addIceCandidate(e.candidate);
+            console.log('Sending ICE candidate:', e.candidate);
+            localConnection.addIceCandidate(e.candidate)
+                .catch(err => console.error('Error adding ICE candidate:', err));
         }
     };
 
-    remoteConnection.ondatachannel = e => {
-        remoteChannel = e.channel;
-        remoteChannel.onmessage = e => {
-            console.log('Received data from remote:', e.data);
-            handleMessage(JSON.parse(e.data));
-        };
-    };
-
-    localChannel.onmessage = e => {
-        console.log('Received data from local:', e.data);
-        handleMessage(JSON.parse(e.data));
-    };
-
     localConnection.createOffer()
-        .then(offer => localConnection.setLocalDescription(offer))
+        .then(offer => {
+            console.log('Creating offer:', offer);
+            return localConnection.setLocalDescription(offer);
+        })
         .then(() => remoteConnection.setRemoteDescription(localConnection.localDescription))
         .then(() => remoteConnection.createAnswer())
-        .then(answer => remoteConnection.setLocalDescription(answer))
+        .then(answer => {
+            console.log('Creating answer:', answer);
+            return remoteConnection.setLocalDescription(answer);
+        })
         .then(() => localConnection.setRemoteDescription(remoteConnection.localDescription))
-        .catch(err => console.error('Error creating connection:', err));
+        .catch(err => console.error('Error during connection setup:', err));
 }
 
 function handleMessage(data) {
-    console.log('Handling message:', data);
-    if (data.type === NAME_TAG) {
-        remoteUserName = data.name; // Update remote user's name
-    } else if (data.type === MESSAGE_TAG) {
-        addMessage(data.name, data.message);
+    try {
+        const parsedData = JSON.parse(data);
+        console.log('Handling message:', parsedData);
+        if (parsedData.type === NAME_TAG) {
+            // Assuming names are not directly used here but could be for other purposes
+        } else if (parsedData.type === MESSAGE_TAG) {
+            addMessage(parsedData.name, parsedData.message);
+        }
+    } catch (error) {
+        console.error('Error parsing message data:', error);
     }
 }
 
