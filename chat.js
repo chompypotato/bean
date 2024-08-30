@@ -2,12 +2,12 @@ const messagesDiv = document.getElementById('messages');
 const messageInput = document.getElementById('message-input');
 const nameInput = document.getElementById('name-input');
 const sendButton = document.getElementById('send-button');
-const remoteNameInput = document.getElementById('remote-name-input'); // Added input for remote name
+const remoteNameInput = document.getElementById('remote-name-input'); // Input for remote name
 
 // STUN server configuration
 const servers = {
     iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' }
+        { urls: 'stun:stun.l.google.com:19302' } // Public STUN server
     ]
 };
 
