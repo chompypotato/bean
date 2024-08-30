@@ -1,66 +1,43 @@
-// Set up canvas and context
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+let userName = '';
 
-// Game variables
-const player = {
-    x: canvas.width / 2,
-    y: canvas.height - 30,
-    width: 50,
-    height: 20,
-    speed: 5,
-    color: 'white'
-};
+// Set name functionality
+document.getElementById('setNameButton').addEventListener('click', function() {
+    const nameInput = document.getElementById('nameInput').value.trim();
 
-const bullets = [];
-const bulletSpeed = 7;
-
-document.addEventListener('keydown', (event) => {
-    if (event.code === 'ArrowLeft') {
-        player.x -= player.speed;
-    } else if (event.code === 'ArrowRight') {
-        player.x += player.speed;
-    } else if (event.code === 'Space') {
-        shoot();
+    if (nameInput === '') {
+        alert('Please enter a name.');
+        return;
     }
+
+    userName = nameInput;
+    document.getElementById('nameInput').value = '';
+    document.getElementById('nameSection').style.display = 'none'; // Hide name input section after setting the name
 });
 
-// Shoot a bullet
-function shoot() {
-    bullets.push({
-        x: player.x + player.width / 2,
-        y: player.y,
-        width: 5,
-        height: 10,
-        color: 'red'
-    });
-}
+// Send message functionality
+document.getElementById('sendButton').addEventListener('click', function() {
+    if (userName === '') {
+        alert('Please set your name first.');
+        return;
+    }
 
-// Game loop
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const messageInput = document.getElementById('messageInput').value.trim();
+    
+    if (messageInput === '') {
+        alert('Please enter a message.');
+        return;
+    }
 
-    // Draw player
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    const chatBox = document.getElementById('chatBox');
 
-    // Update and draw bullets
-    bullets.forEach((bullet, index) => {
-        bullet.y -= bulletSpeed;
-        ctx.fillStyle = bullet.color;
-        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+    // Create a new message element
+    const messageElement = document.createElement('div');
+    messageElement.textContent = `${userName}: ${messageInput}`;
+    chatBox.appendChild(messageElement);
 
-        // Remove bullets that have gone off-screen
-        if (bullet.y < 0) {
-            bullets.splice(index, 1);
-        }
-    });
-
-    requestAnimationFrame(gameLoop);
-}
-
-// Start the game loop
-gameLoop();
-
+    // Clear the message input
+    document.getElementById('messageInput').value = '';
+    
+    // Auto-scroll to the bottom
+    chatBox.scrollTop = chatBox.scrollHeight;
+});
