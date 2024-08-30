@@ -8,10 +8,11 @@ let remoteConnection;
 let localChannel;
 let remoteChannel;
 
-const servers = null; // For testing. Use a STUN server for production.
+const servers = null; // Use a STUN server for production
 const NAME_TAG = 'name';
 const MESSAGE_TAG = 'message';
 
+let localUserName = 'You';
 let remoteUserName = 'Remote'; // Default remote user name
 
 function createConnection() {
@@ -59,7 +60,7 @@ function handleMessage(data, source) {
         if (parsedData.type === NAME_TAG) {
             remoteUserName = parsedData.name; // Update remote user's name
         } else if (parsedData.type === MESSAGE_TAG) {
-            addMessage(source === 'local' ? 'You' : remoteUserName, parsedData.message);
+            addMessage(source === 'local' ? localUserName : remoteUserName, parsedData.message);
         }
     } catch (error) {
         console.error('Error parsing message data:', error);
@@ -75,11 +76,11 @@ function addMessage(name, message) {
 
 sendButton.addEventListener('click', () => {
     const message = messageInput.value;
-    const name = nameInput.value || 'You';
+    localUserName = nameInput.value || 'You'; // Update local user name
     if (message) {
-        const messageData = JSON.stringify({ type: MESSAGE_TAG, name, message });
+        const messageData = JSON.stringify({ type: MESSAGE_TAG, name: localUserName, message });
         localChannel.send(messageData);
-        addMessage(name, message);
+        addMessage(localUserName, message);
         messageInput.value = '';
     }
 });
