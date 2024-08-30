@@ -9,6 +9,7 @@ let localChannel;
 let remoteChannel;
 
 const servers = null;
+const NAME_TAG = "NAME";
 
 function createConnection() {
     localConnection = new RTCPeerConnection(servers);
@@ -32,12 +33,12 @@ function createConnection() {
     remoteConnection.ondatachannel = e => {
         remoteChannel = e.channel;
         remoteChannel.onmessage = e => {
-            addMessage('Remote', e.data);
+            handleMessage(e.data);
         };
     };
 
     localChannel.onmessage = e => {
-        addMessage(nameInput.value || 'You', e.data);
+        handleMessage(e.data);
     };
 
     localConnection.createOffer()
@@ -46,6 +47,16 @@ function createConnection() {
         .then(() => remoteConnection.createAnswer())
         .then(answer => remoteConnection.setLocalDescription(answer))
         .then(() => localConnection.setRemoteDescription(remoteConnection.localDescription));
+}
+
+function handleMessage(data) {
+    const [type, ...messageParts] = data.split(":", 2);
+    const message = messageParts.join(":");
+    if (type === NAME_TAG) {
+        remoteUserName = message; // Update remote user's name
+    } else {
+        addMessage(type, message);
+    }
 }
 
 function addMessage(name, message) {
@@ -59,10 +70,16 @@ sendButton.addEventListener('click', () => {
     const message = messageInput.value;
     const name = nameInput.value || 'You';
     if (message) {
-        localChannel.send(message);
+        localChannel.send(`${name}:${message}`);
         addMessage(name, message);
         messageInput.value = '';
     }
 });
 
+function sendName() {
+    const name = nameInput.value || 'You';
+    localChannel.send(`${NAME_TAG}:${name}`);
+}
+
 createConnection();
+sendName();
