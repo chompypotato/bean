@@ -8,7 +8,19 @@ let remoteConnection;
 let localChannel;
 let remoteChannel;
 
-const servers = null; // Use a STUN server for production
+const servers = {
+    iceServers: [
+        {
+            urls: 'stun:stun.l.google.com:19302'
+        },
+        {
+            urls: 'stun:stun1.l.google.com:19302'
+        },
+        {
+            urls: 'stun:stun2.l.google.com:19302'
+        }
+    ]
+}; // Use a STUN server for production
 const NAME_TAG = 'name';
 const MESSAGE_TAG = 'message';
 
