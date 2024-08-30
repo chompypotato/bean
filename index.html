@@ -3,22 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple 2D Shooter</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
-        canvas {
-            display: block;
-            background: #000;
-        }
-    </style>
+    <title>Chat App</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <script src="game.js"></script>
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox"></div>
+        <div id="nameSection">
+            <input type="text" id="nameInput" placeholder="Enter your name">
+            <button id="setNameButton">Set Name</button>
+        </div>
+        <textarea id="messageInput" placeholder="Type your message"></textarea>
+        <button id="sendButton">Send</button>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
-
-
