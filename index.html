@@ -3,33 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bean</title>
+    <title>WebRTC Chat</title>
     <style>
         #messages {
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             height: 300px;
             overflow-y: scroll;
             margin-bottom: 10px;
         }
-        #message-input, #name-input {
-            width: 70%;
-            margin-right: 10px;
-        }
-        #send-button {
-            width: 20%;
+        #input-container {
+            display: flex;
+            flex-direction: column;
         }
     </style>
 </head>
 <body>
-    <h1>bean chat 1.0</h1>
-    <div>
-        <label for="name-input">Your Name:</label>
-        <input id="name-input" type="text" placeholder="Enter your name...">
-    </div>
     <div id="messages"></div>
-    <input id="message-input" type="text" placeholder="Type a message...">
-    <button id="send-button">Send</button>
-
+    <div id="input-container">
+        <input id="name-input" placeholder="Your Name" />
+        <input id="message-input" placeholder="Your Message" />
+        <button id="send-button">Send</button>
+    </div>
     <script src="chat.js"></script>
 </body>
 </html>
