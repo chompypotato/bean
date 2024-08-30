@@ -9,7 +9,8 @@ let localChannel;
 let remoteChannel;
 
 const servers = null;
-let remoteUserName = 'Remote'; // Default remote name
+const NAME_TAG = 'name';
+const MESSAGE_TAG = 'message';
 
 function createConnection() {
     localConnection = new RTCPeerConnection(servers);
@@ -33,11 +34,13 @@ function createConnection() {
     remoteConnection.ondatachannel = e => {
         remoteChannel = e.channel;
         remoteChannel.onmessage = e => {
+            console.log('Received data from remote:', e.data);
             handleMessage(JSON.parse(e.data));
         };
     };
 
     localChannel.onmessage = e => {
+        console.log('Received data from local:', e.data);
         handleMessage(JSON.parse(e.data));
     };
 
@@ -46,13 +49,15 @@ function createConnection() {
         .then(() => remoteConnection.setRemoteDescription(localConnection.localDescription))
         .then(() => remoteConnection.createAnswer())
         .then(answer => remoteConnection.setLocalDescription(answer))
-        .then(() => localConnection.setRemoteDescription(remoteConnection.localDescription));
+        .then(() => localConnection.setRemoteDescription(remoteConnection.localDescription))
+        .catch(err => console.error('Error creating connection:', err));
 }
 
 function handleMessage(data) {
-    if (data.type === 'name') {
+    console.log('Handling message:', data);
+    if (data.type === NAME_TAG) {
         remoteUserName = data.name; // Update remote user's name
-    } else if (data.type === 'message') {
+    } else if (data.type === MESSAGE_TAG) {
         addMessage(data.name, data.message);
     }
 }
@@ -68,7 +73,8 @@ sendButton.addEventListener('click', () => {
     const message = messageInput.value;
     const name = nameInput.value || 'You';
     if (message) {
-        const messageData = JSON.stringify({ type: 'message', name, message });
+        const messageData = JSON.stringify({ type: MESSAGE_TAG, name, message });
+        console.log('Sending message:', messageData);
         localChannel.send(messageData);
         addMessage(name, message);
         messageInput.value = '';
@@ -77,7 +83,8 @@ sendButton.addEventListener('click', () => {
 
 function sendName() {
     const name = nameInput.value || 'You';
-    const nameData = JSON.stringify({ type: 'name', name });
+    const nameData = JSON.stringify({ type: NAME_TAG, name });
+    console.log('Sending name:', nameData);
     localChannel.send(nameData);
 }
 
