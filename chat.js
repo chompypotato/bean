@@ -8,7 +8,7 @@ let remoteConnection;
 let localChannel;
 let remoteChannel;
 
-const servers = null;
+const servers = null; // For testing. Use a STUN server for production.
 const NAME_TAG = 'name';
 const MESSAGE_TAG = 'message';
 
@@ -18,30 +18,19 @@ function createConnection() {
     localConnection = new RTCPeerConnection(servers);
     remoteConnection = new RTCPeerConnection(servers);
 
-    // Create data channels
+    // Create data channel on local peer
     localChannel = localConnection.createDataChannel('chat');
-    console.log('Local channel created:', localChannel);
+    localChannel.onmessage = e => handleMessage(e.data, 'local');
 
-    // Handle incoming data channel on the remote peer
-    remoteConnection.ondatachannel = e => {
-        remoteChannel = e.channel;
-        console.log('Remote channel received:', remoteChannel);
-        remoteChannel.onmessage = e => {
-            console.log('Received message from remote:', e.data);
-            handleMessage(e.data, 'remote');
-        };
+    // Set up data channel on remote peer
+    remoteConnection.ondatachannel = event => {
+        remoteChannel = event.channel;
+        remoteChannel.onmessage = e => handleMessage(e.data, 'remote');
     };
 
-    // Handle incoming data channel messages on the local peer
-    localChannel.onmessage = e => {
-        console.log('Received message from local channel:', e.data);
-        handleMessage(e.data, 'local');
-    };
-
-    // ICE candidate handling
+    // ICE candidate exchange
     localConnection.onicecandidate = e => {
         if (e.candidate) {
-            console.log('Sending ICE candidate:', e.candidate);
             remoteConnection.addIceCandidate(e.candidate)
                 .catch(err => console.error('Error adding ICE candidate:', err));
         }
@@ -49,35 +38,26 @@ function createConnection() {
 
     remoteConnection.onicecandidate = e => {
         if (e.candidate) {
-            console.log('Sending ICE candidate:', e.candidate);
             localConnection.addIceCandidate(e.candidate)
                 .catch(err => console.error('Error adding ICE candidate:', err));
         }
     };
 
-    // Create offer and answer for the WebRTC connection
+    // Offer/Answer exchange
     localConnection.createOffer()
-        .then(offer => {
-            console.log('Creating offer:', offer);
-            return localConnection.setLocalDescription(offer);
-        })
+        .then(offer => localConnection.setLocalDescription(offer))
         .then(() => remoteConnection.setRemoteDescription(localConnection.localDescription))
         .then(() => remoteConnection.createAnswer())
-        .then(answer => {
-            console.log('Creating answer:', answer);
-            return remoteConnection.setLocalDescription(answer);
-        })
+        .then(answer => remoteConnection.setLocalDescription(answer))
         .then(() => localConnection.setRemoteDescription(remoteConnection.localDescription))
-        .catch(err => console.error('Error during connection setup:', err));
+        .catch(error => console.error('Error during offer/answer setup:', error));
 }
 
 function handleMessage(data, source) {
     try {
         const parsedData = JSON.parse(data);
-        console.log('Handling message:', parsedData);
         if (parsedData.type === NAME_TAG) {
             remoteUserName = parsedData.name; // Update remote user's name
-            console.log(`Updated remote user name to: ${remoteUserName}`);
         } else if (parsedData.type === MESSAGE_TAG) {
             addMessage(source === 'local' ? 'You' : remoteUserName, parsedData.message);
         }
@@ -98,7 +78,6 @@ sendButton.addEventListener('click', () => {
     const name = nameInput.value || 'You';
     if (message) {
         const messageData = JSON.stringify({ type: MESSAGE_TAG, name, message });
-        console.log('Sending message:', messageData);
         localChannel.send(messageData);
         addMessage(name, message);
         messageInput.value = '';
@@ -108,10 +87,9 @@ sendButton.addEventListener('click', () => {
 function sendName() {
     const name = nameInput.value || 'You';
     const nameData = JSON.stringify({ type: NAME_TAG, name });
-    console.log('Sending name:', nameData);
     localChannel.send(nameData);
 }
 
-// Create the WebRTC connection and send the local name
+// Initialize the connection and send the local name
 createConnection();
 sendName();
