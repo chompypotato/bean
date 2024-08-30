@@ -19,6 +19,7 @@ const enemySpeed = 2;
 const maxAmmo = 30; // Increased ammo capacity
 let ammo = maxAmmo;
 let lastShotTime = 0;
+const shootDelay = 100; // Time in milliseconds between shots
 const reloadTime = 2000; // Time in milliseconds to reload bullets
 let isReloading = false; // Track if reloading is in progress
 let reloadStartTime = 0; // Track when reloading started
@@ -31,6 +32,7 @@ function update() {
     updateDisplay();
     spawnEnemies();
     draw();
+    handleReloading();
     requestAnimationFrame(update);
 }
 
@@ -135,12 +137,25 @@ function updateDisplay() {
     ammoDisplay.textContent = ammo;
 }
 
+function handleReloading() {
+    if (isReloading) {
+        const now = Date.now();
+        if (now - reloadStartTime >= reloadTime) {
+            ammo = maxAmmo; // Refill ammo
+            isReloading = false; // End reloading
+            updateDisplay(); // Update ammo display after reloading
+        }
+    }
+}
+
 const keys = {};
 document.addEventListener('keydown', (e) => {
     keys[e.key] = true;
-    if (e.key === 'r' && !isReloading && ammo < maxAmmo) {
-        isReloading = true;
-        reloadStartTime = Date.now();
+    if (e.key === 'r') {
+        if (!isReloading && ammo < maxAmmo) {
+            isReloading = true;
+            reloadStartTime = Date.now();
+        }
     }
 });
 document.addEventListener('keyup', (e) => keys[e.key] = false);
@@ -148,7 +163,7 @@ document.addEventListener('keyup', (e) => keys[e.key] = false);
 document.addEventListener('click', () => {
     if (!isReloading) {
         const now = Date.now();
-        if (ammo > 0 && now - lastShotTime > 100) { // Reduced time to shoot again
+        if (ammo > 0 && now - lastShotTime > shootDelay) { // Time between shots
             bullets.push({
                 x: player.x + player.width / 2 - 5,
                 y: player.y,
@@ -157,24 +172,9 @@ document.addEventListener('click', () => {
             });
             ammo--;
             lastShotTime = now;
+            updateDisplay(); // Update ammo display after shooting
         }
     }
 });
 
-function handleReloading() {
-    if (isReloading) {
-        const now = Date.now();
-        if (now - reloadStartTime >= reloadTime) {
-            ammo = maxAmmo; // Refill ammo
-            isReloading = false; // End reloading
-        }
-    }
-}
-
-function gameLoop() {
-    handleReloading();
-    update();
-}
-
-gameLoop();
-
+update();
