@@ -12,29 +12,33 @@ const servers = null;
 const NAME_TAG = 'name';
 const MESSAGE_TAG = 'message';
 
-let remoteUserName = 'Remote';
+let remoteUserName = 'Remote'; // Default remote user name
 
 function createConnection() {
     localConnection = new RTCPeerConnection(servers);
     remoteConnection = new RTCPeerConnection(servers);
 
+    // Create data channels
     localChannel = localConnection.createDataChannel('chat');
     console.log('Local channel created:', localChannel);
 
+    // Handle incoming data channel on the remote peer
     remoteConnection.ondatachannel = e => {
         remoteChannel = e.channel;
         console.log('Remote channel received:', remoteChannel);
         remoteChannel.onmessage = e => {
-            console.log('Received data from remote channel:', e.data);
+            console.log('Received message from remote:', e.data);
             handleMessage(e.data, 'remote');
         };
     };
 
+    // Handle incoming data channel messages on the local peer
     localChannel.onmessage = e => {
-        console.log('Received data from local channel:', e.data);
+        console.log('Received message from local channel:', e.data);
         handleMessage(e.data, 'local');
     };
 
+    // ICE candidate handling
     localConnection.onicecandidate = e => {
         if (e.candidate) {
             console.log('Sending ICE candidate:', e.candidate);
@@ -51,6 +55,7 @@ function createConnection() {
         }
     };
 
+    // Create offer and answer for the WebRTC connection
     localConnection.createOffer()
         .then(offer => {
             console.log('Creating offer:', offer);
@@ -71,7 +76,7 @@ function handleMessage(data, source) {
         const parsedData = JSON.parse(data);
         console.log('Handling message:', parsedData);
         if (parsedData.type === NAME_TAG) {
-            remoteUserName = parsedData.name;
+            remoteUserName = parsedData.name; // Update remote user's name
             console.log(`Updated remote user name to: ${remoteUserName}`);
         } else if (parsedData.type === MESSAGE_TAG) {
             addMessage(source === 'local' ? 'You' : remoteUserName, parsedData.message);
@@ -107,5 +112,6 @@ function sendName() {
     localChannel.send(nameData);
 }
 
+// Create the WebRTC connection and send the local name
 createConnection();
 sendName();
