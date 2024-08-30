@@ -12,6 +12,8 @@ const servers = null;
 const NAME_TAG = 'name';
 const MESSAGE_TAG = 'message';
 
+let remoteUserName = 'Remote';
+
 function createConnection() {
     localConnection = new RTCPeerConnection(servers);
     remoteConnection = new RTCPeerConnection(servers);
@@ -24,13 +26,13 @@ function createConnection() {
         console.log('Remote channel received:', remoteChannel);
         remoteChannel.onmessage = e => {
             console.log('Received data from remote channel:', e.data);
-            handleMessage(e.data);
+            handleMessage(e.data, 'remote');
         };
     };
 
     localChannel.onmessage = e => {
         console.log('Received data from local channel:', e.data);
-        handleMessage(e.data);
+        handleMessage(e.data, 'local');
     };
 
     localConnection.onicecandidate = e => {
@@ -64,14 +66,15 @@ function createConnection() {
         .catch(err => console.error('Error during connection setup:', err));
 }
 
-function handleMessage(data) {
+function handleMessage(data, source) {
     try {
         const parsedData = JSON.parse(data);
         console.log('Handling message:', parsedData);
         if (parsedData.type === NAME_TAG) {
-            // Assuming names are not directly used here but could be for other purposes
+            remoteUserName = parsedData.name;
+            console.log(`Updated remote user name to: ${remoteUserName}`);
         } else if (parsedData.type === MESSAGE_TAG) {
-            addMessage(parsedData.name, parsedData.message);
+            addMessage(source === 'local' ? 'You' : remoteUserName, parsedData.message);
         }
     } catch (error) {
         console.error('Error parsing message data:', error);
